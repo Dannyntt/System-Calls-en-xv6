@@ -7,6 +7,7 @@
 - **Integrantes:**
   - Daniela Giraldo Salas — GitHub: @dannyntt
   - Matías Gil Montoya — GitHub: @matgimon18a
+  - Gisel Jaramillo Carmona - Github: @gljaramilloc 
 
 ## Descripción de la Solución
 
