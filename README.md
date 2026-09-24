@@ -77,6 +77,24 @@ poder mostrar el valor de retorno ya calculado. Los registros de argumentos
   tanto por el kernel como por `user/sysinfo.c`) y la copia al puntero que
   recibe como argumento usando `copyout(p->pagetable, p->sz, dst, ...)`.
 
+### Verificación de integración entre `trace` y `sysinfo`
+
+Antes de la entrega se verificó explícitamente que las dos syscalls
+nuevas conviven sin interferirse: se activó `trace` sobre distintas
+syscalls (`kill`, `write`, `sysinfo`) y se confirmó en cada caso que:
+
+- El reporte de `trace` incluye el PID correcto, el nombre de la syscall,
+  el valor de retorno y los cuatro registros pedidos.
+- `trace off` desactiva el rastreo de forma inmediata (verificado
+  llamando de nuevo a la syscall vigilada y confirmando que ya no
+  imprime nada).
+- `sysinfo` reporta valores coherentes (memoria libre, páginas usadas/
+  disponibles y procesos `RUNNABLE`) tanto con `trace` activo como
+  inactivo, sin verse afectada por el mecanismo de rastreo.
+- El resto del sistema (`ls`, `echo`, `cat`, el shell del Proyecto 1)
+  sigue funcionando exactamente igual después de integrar ambas
+  syscalls.
+
 ## Archivos Modificados
 
 | Archivo | Descripción del cambio |
@@ -154,6 +172,39 @@ hace dos llamadas a `sys_write` — el contenido y el salto de línea — por es
 se ven dos bloques de trace.)
 
 Para salir de QEMU: `Ctrl-a` seguido de `x`.
+
+### Prueba adicional: `trace` y `sysinfo` en conjunto
+
+Para confirmar que ambas syscalls funcionan correctamente cuando una
+observa a la otra, se activó el rastreo sobre `sysinfo` mismo:
+
+```
+$ trace sysinfo
+trace: rastreando 'sysinfo' (syscall num 24)
+$ sysinfo
+PID: 4
+SYSCALL: sysinfo
+RETURN: 0
+s0: 0x3fd0
+s1: 0x14f50
+a0: 0x0
+a1: 0x3fe0
+Free Memory: 127 MB
+Used Pages: 233
+Available Pages: 32535
+Runnable Processes: 0
+```
+
+**Nota sobre el orden de la salida:** el bloque de `trace`
+(`PID/SYSCALL/RETURN/registros`) aparece impreso *antes* que el resultado
+de `sysinfo` (`Free Memory/...`), aunque en el código `trace` imprime
+*después* de que `sysinfo` ya calculó y devolvió todos sus datos. Esto se
+debe a que el reporte de `trace` se imprime con `printk` (escritura
+directa a la consola desde el kernel, sin buffer), mientras que
+`user/sysinfo.c` usa `printf` de espacio de usuario, cuyo buffer se vacía
+a la pantalla un instante después. No indica ningún error de lógica ni de
+orden de ejecución real, solo una diferencia de timing entre la
+impresión del kernel y la del proceso de usuario.
 
 ## Uso de IA
 
