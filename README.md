@@ -206,6 +206,8 @@ a la pantalla un instante después. No indica ningún error de lógica ni de
 orden de ejecución real, solo una diferencia de timing entre la
 impresión del kernel y la del proceso de usuario.
 
+- **Video Demostrativo:** [Ver video en Google Drive](https://drive.google.com/file/d/1zH63DKjzIJSUvbG8Y27sBblPubb6J8k4/view?usp=sharing)
+
 ## Uso de IA
 
 Se utilizó Claude (Anthropic) como herramienta de IA como apoyo
